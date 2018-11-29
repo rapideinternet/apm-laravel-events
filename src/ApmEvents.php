@@ -20,6 +20,8 @@ class ApmEvents
     {
         $this->current_event = $event_name;
 
+        //Find event type
+
         return $this;
     }
 

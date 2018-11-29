@@ -131,8 +131,6 @@ return [
 	| the datatype of a certain field. Specially when you need to query it by its
 	| exact value instead of doing a fuzzy searching.
 	*/
-
-
     'event_schemas' => [
 
         Rapide\LaravelApmEvents\Schemas\ClickSchema::class,
