@@ -2,7 +2,7 @@
 
 namespace Rapide\LaravelApmEvents\Schemas;
 
-class ImpressionSchema implements Schema
+class ImpressionSchema extends BaseSchema
 {
 
     /**
@@ -19,5 +19,25 @@ class ImpressionSchema implements Schema
     public function getMappings(): array
     {
         return ['element' => ["type" => "string", "index" => "not_analyzed"]];
+    }
+
+    /**
+     * @return array
+     */
+    public function getSettings(): array
+    {
+        return [
+            'analysis' => [
+                'filter' => [
+
+                ],
+                'char_filter' => [
+
+                ],
+                'analyzer' => [
+
+                ]
+            ]
+        ];
     }
 }

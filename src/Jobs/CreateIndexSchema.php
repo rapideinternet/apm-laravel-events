@@ -24,7 +24,7 @@ class CreateIndexSchema implements ShouldQueue
     {
         $params = $this->params['mappings'];
         $client = $clientFactory->getClient();
-
+        
         try {
             $client->indices()->create($params);
         } catch (\Exception $e) {

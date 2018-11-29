@@ -1,6 +1,6 @@
 <?php
 
-namespace Rapide\LaravelApmEvents\Schemas;
+namespace Rapide\LaravelApmEvents\Contracts;
 
 interface Schema
 {
@@ -13,4 +13,15 @@ interface Schema
      * @return array
      */
     public function getMappings(): array;
+
+    /**
+     * @return array
+     */
+    public function getSettings(): array;
+
+    /**
+     * @param $params
+     * @return bool
+     */
+    public function validate($params): bool;
 }

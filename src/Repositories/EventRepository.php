@@ -5,6 +5,7 @@ use Illuminate\Support\Collection;
 use Jenssegers\Agent\Agent;
 use Rapide\LaravelApmEvents\Decorators\EventDecorator;
 use Rapide\LaravelApmEvents\Jobs\SaveEvent;
+use Rapide\LaravelApmEvents\Schemas\BaseSchema;
 
 
 class EventRepository implements \Rapide\LaravelApmEvents\Contracts\Repositories\EventRepository
@@ -40,15 +41,15 @@ class EventRepository implements \Rapide\LaravelApmEvents\Contracts\Repositories
      * @param $eventName
      * @param $eventData
      */
-    public function create($eventName, $eventData)
+    public function create(BaseSchema $schema, $eventData)
     {
-        $indexname = $this->indexRepository->buildIndexName($eventName);
+        $indexName = $this->indexRepository->buildIndexName($schema->getEventName());
 
         $eventData = $this->eventDecorator->decorate($eventData);
 
         $params = [
-            'indexname' => $indexname,
-            'eventName' => $eventName,
+            'indexname' => $indexName,
+            'eventName' => $schema->getEventName(),
             'eventData' => $eventData
         ];
 
@@ -59,7 +60,7 @@ class EventRepository implements \Rapide\LaravelApmEvents\Contracts\Repositories
 
     }
 
-    public function all($event_name)
+    public function all(BaseSchema $schema)
     {
     }
 
@@ -73,20 +74,20 @@ class EventRepository implements \Rapide\LaravelApmEvents\Contracts\Repositories
 
     }
 
-    public function delete($eventName)
+    public function delete(BaseSchema $schema)
     {
         $params = [
-            'index' => $this->indexRepository->build($eventName)
+            'index' => $this->indexRepository->build($schema->getEventName())
         ];
 
-        //$response = $this->client->indices()->delete($params);
+        //0return $this->client->indices()->delete($params);
     }
 
     /**
      * @param $search_result
      * @return Collection
      */
-    protected function convert_to_collection($search_result): Collection
+    protected function convertToCollection($search_result): Collection
     {
 
         $data = $search_result['hits']['hits'];

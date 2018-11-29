@@ -6,9 +6,10 @@ use Illuminate\Console\Command;
 use Rapide\LaravelApmEvents\ClientFactory;
 use Rapide\LaravelApmEvents\Contracts\Decorators\SchemaMappingDecorator;
 use Rapide\LaravelApmEvents\Contracts\Repositories\IndexRepository;
+use Rapide\LaravelApmEvents\Contracts\SchemaManager;
 use Rapide\LaravelApmEvents\Jobs\CreateIndexSchema;
 use Rapide\LaravelApmEvents\Jobs\CreateIndexTemplate;
-use Rapide\LaravelApmEvents\Schemas\Schema;
+use Rapide\LaravelApmEvents\Schemas\BaseSchema;
 
 class CreateSchema extends Command
 {
@@ -47,16 +48,19 @@ class CreateSchema extends Command
      *
      * @return mixed
      */
-    public function handle(ClientFactory $clientFactory, SchemaMappingDecorator $schemaMappingDecorator)
-    {
+    public function handle(
+        ClientFactory $clientFactory,
+        SchemaManager $schemaManager,
+        SchemaMappingDecorator $schemaMappingDecorator
+    ) {
         $this->info('Creating the Schema for the apm-events events');
         $this->info('<comment>Connecting to ES Server:</comment> ' . config('apm-events.hosts')[0]);
 
-        foreach (config('apm-events.event_schemas') as $schema_class) {
-            /** @var Schema $cur_schema */
-            $cur_schema = new $schema_class;
-            $event_schema = $cur_schema->getEventName();
-            $properties = $cur_schema->getMappings();
+        /** @var BaseSchema $schema */
+        foreach ($schemaManager->getSchemas() as $schema) {
+
+            $event_schema = $schema->getEventName();
+            $properties = $schema->getMappings();
 
             $indexName = $this->indexRepository->buildIndexName($event_schema);
             $properties = $schemaMappingDecorator->decorate($properties);

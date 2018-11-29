@@ -2,7 +2,7 @@
 
 namespace Rapide\LaravelApmEvents\Schemas;
 
-class PageviewSchema implements Schema
+class PageviewSchema extends BaseSchema
 {
 
     /**
@@ -19,5 +19,25 @@ class PageviewSchema implements Schema
     public function getMappings(): array
     {
         return ['page' => ["type" => "string", "index" => "not_analyzed"]];
+    }
+
+    /**
+     * @return array
+     */
+    public function getSettings(): array
+    {
+        return [
+            'analysis' => [
+                'filter' => [
+
+                ],
+                'char_filter' => [
+
+                ],
+                'analyzer' => [
+
+                ]
+            ]
+        ];
     }
 }

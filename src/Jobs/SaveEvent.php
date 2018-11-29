@@ -23,6 +23,7 @@ class SaveEvent implements ShouldQueue
 
     public function handle(ClientFactory $clientFactory, LoggerInterface $log)
     {
+
         $params = [
             'index' => $this->params['indexname'],
             'type' => $this->params['eventName'],
