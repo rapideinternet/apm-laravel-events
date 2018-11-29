@@ -1,13 +1,13 @@
 <?php
-namespace Buonzz\Evorg\Jobs;
+
+namespace Rapide\LaravelApmEvents\Jobs;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
-
-use Elasticsearch\ClientBuilder;
-use Buonzz\Evorg\ClientFactory;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
+use Psr\Log\LoggerInterface;
+use Rapide\LaravelApmEvents\ClientFactory;
 
 class CreateIndexTemplate implements ShouldQueue
 {
@@ -20,7 +20,7 @@ class CreateIndexTemplate implements ShouldQueue
         $this->params = $params;
     }
 
-    public function handle()
+    public function handle(ClientFactory $clientFactory, LoggerInterface $log)
     {
         $params = $this->params['mappings'];
 
@@ -31,16 +31,15 @@ class CreateIndexTemplate implements ShouldQueue
         // strip off the dates
         $template_name = substr($template_name, 0, -7);
 
-        $params['name'] = 'evorg-' . md5($template_name);
+        $params['name'] = 'apm-events-' . md5($template_name);
         $params['body']['template'] = $template_name . "*";
 
-        $client = ClientFactory::getClient();
+        $client = $clientFactory->getClient();
 
-        try{
-                $client->indices()->putTemplate($params);
-        }
-        catch(\Exception $e){
-                \Log::error($e->getMessage());
+        try {
+            $client->indices()->putTemplate($params);
+        } catch (\Exception $e) {
+            $log->error($e->getMessage());
         }
 
     }

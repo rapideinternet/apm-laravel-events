@@ -1,33 +1,52 @@
 <?php
-namespace Buonzz\Evorg;
 
-use Monolog\Logger;
-use Log;
+namespace Rapide\LaravelApmEvents;
+
 use Elasticsearch\ClientBuilder;
+use Illuminate\Log\Logger;
+use Psr\Log\LoggerInterface;
 
-class ClientFactory{
+class ClientFactory
+{
 
-	 public static function getClient(){
+    /**
+     * @var ClientBuilder
+     */
+    protected $clientBuilder;
+    /**
+     * @var Logger
+     */
+    protected $logger;
 
-        $hosts = config('evorg.hosts');       
-        $logging = config('evorg.logging');
+    /**
+     * ClientFactory constructor.
+     * @param ClientBuilder $clientBuilder
+     * @param LoggerInterface $logger
+     */
+    public function __construct(ClientBuilder $clientBuilder, LoggerInterface $logger)
+    {
+        $this->clientBuilder = $clientBuilder;
+        $this->logger = $logger;
+    }
 
-        if($logging)
-		{ 
-       		$logger = ClientBuilder::defaultLogger( storage_path(). '/logs/evorg.log', Logger::INFO);
-        	$client = ClientBuilder::create()   // Instantiate a new ClientBuilder
-                	->setHosts($hosts)      // Set the hosts
-                	->setLogger($logger)
-                	->build();              // Build the client object
-		}
-		else
-		{
-        	$client = ClientBuilder::create()   // Instantiate a new ClientBuilder
-                	->setHosts($hosts)      // Set the hosts
-                	->build();              // Build the client object			
-		}
+    /**
+     * @return \Elasticsearch\Client
+     */
+    public function getClient()
+    {
+        $hosts = config('apm-events.hosts');
 
-         return $client;
-	} // get client
+        if (config('apm-events.logging', false)) {
+            $client = $this->clientBuilder
+                ->setHosts($hosts)
+                ->setLogger($this->logger)
+                ->build();
+        } else {
+            $client = $this->clientBuilder
+                ->setHosts($hosts)
+                ->build();
+        }
 
-} // factory}
+        return $client;
+    }
+}

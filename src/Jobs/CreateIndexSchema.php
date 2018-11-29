@@ -1,13 +1,13 @@
 <?php
-namespace Buonzz\Evorg\Jobs;
+
+namespace Rapide\LaravelApmEvents\Jobs;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
-
-use Elasticsearch\ClientBuilder;
-use Buonzz\Evorg\ClientFactory;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
+use Psr\Log\LoggerInterface;
+use Rapide\LaravelApmEvents\ClientFactory;
 
 class CreateIndexSchema implements ShouldQueue
 {
@@ -20,16 +20,15 @@ class CreateIndexSchema implements ShouldQueue
         $this->params = $params;
     }
 
-    public function handle()
+    public function handle(ClientFactory $clientFactory, LoggerInterface $log)
     {
         $params = $this->params['mappings'];
-        $client = ClientFactory::getClient();
+        $client = $clientFactory->getClient();
 
-        try{
-                $client->indices()->create($params);
-        }
-        catch(\Exception $e){
-                \Log::error($e->getMessage());
+        try {
+            $client->indices()->create($params);
+        } catch (\Exception $e) {
+            $log->error($e->getMessage());
         }
 
     }

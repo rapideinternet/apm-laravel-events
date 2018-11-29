@@ -1,18 +1,20 @@
-Evorg
+APM Events for Laravel
 =====
 
 Scalable Events Database for Laravel
 
+This is a rewrite of Buonzz\Evorg
+
 ### Requirements
 
-* PHP >= 5.5.0
+* PHP >= 7.0
 * ElasticSearch Servers
 
 ### Installation
 
 require in composer.json
 
-    "buonzz/evorg": "2.*"
+    "buonzz/apm-events": "2.*"
 
 update composer by executing this in your project base folder
 
@@ -34,18 +36,18 @@ publish the config settings
 php artisan vendor:publish
 ```
 
-edit config/evorg.php
+edit config/apm-events.php
 
 * app_id - is a unique number to identify your app
 * app_name - is the unique name of your app
-* logging - setting this to true makes a log file for evorg in app/storage/logs/evorg.log , good for troubleshooting
+* logging - setting this to true makes a log file for apm-events in app/storage/logs/apm-events.log , good for troubleshooting
 * hosts - address of the elasticsearch servers (see http://www.elasticsearch.org/guide/en/elasticsearch/client/php-api/current/_configuration.html)
 
 
 create the schemas in ElasticSearch
 
 ```
-php artisan evorg:create_schema
+php artisan apm-events:create_schema
 ```
 
 NOTE: The application assumes that the Laravel Task scheduling cron entry is added in your crontab

@@ -1,19 +1,23 @@
 <?php
 
-namespace Buonzz\Evorg\Schemas;
+namespace Rapide\LaravelApmEvents\Schemas;
 
-use Buonzz\Evorg\Indices\SchemaMappingDecorator;
+class PageviewSchema implements Schema
+{
 
-class PageviewSchema implements SchemaInterface {
+    /**
+     * @return string
+     */
+    public function getEventName(): string
+    {
+        return 'pageview';
+    }
 
-	public function getEventName(){
-		return 'pageview';
-	}
-
-	public function getMappings(){
-
-		$mappings = ['page' => ["type" => "string", "index" => "not_analyzed"]];
-
-		return $mappings;
-	}
+    /**
+     * @return array
+     */
+    public function getMappings(): array
+    {
+        return ['page' => ["type" => "string", "index" => "not_analyzed"]];
+    }
 }

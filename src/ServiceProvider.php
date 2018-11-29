@@ -1,9 +1,9 @@
-<?php namespace Buonzz\Evorg;
+<?php namespace Rapide\LaravelApmEvents;
 
 use Illuminate\Support\ServiceProvider as LaravelServiceProvider;
-use Illuminate\Console\Scheduling\Schedule;
 
-class ServiceProvider extends LaravelServiceProvider {
+class ServiceProvider extends LaravelServiceProvider
+{
 
     /**
      * Indicates if loading of the provider is deferred.
@@ -17,20 +17,11 @@ class ServiceProvider extends LaravelServiceProvider {
      *
      * @return void
      */
-    public function boot() {
+    public function boot()
+    {
 
-        $this->handleConfigs();
-
-        // create the index for next month every 28th
-        $this->app->booted(function () {
-
-            $schedule = $this->app->make(Schedule::class);
-            $schedule->command('evorg:create_schema')->monthlyOn(28, '1:00');
-
-            
-
-        });
-
+        $configPath = __DIR__ . '/../config/apm-events.php';
+        $this->publishes([$configPath => config_path('apm-events.php')]);
     }
 
     /**
@@ -38,44 +29,51 @@ class ServiceProvider extends LaravelServiceProvider {
      *
      * @return void
      */
-    public function register() {
+    public function register()
+    {
+        $configPath = __DIR__ . '/../config/apm-events.php';
+        $this->mergeConfigFrom($configPath, 'apm-events');
 
-        $this->app->bind('evorg', function(){
-            return new Evorg;
+
+        $this->app->bind('apm-events', function () {
+            return new ApmEvents;
         });
 
-        $this->register_commands();
+        $this->registerRepositories();
+        $this->registerCommands();
+
     }
+
+    protected function registerRepositories()
+    {
+        $this->app->bind(Contracts\Decorators\EventDecorator::class, Decorators\EventDecorator::class);
+
+        $this->app->bind(Contracts\Repositories\EventRepository::class, Repositories\EventRepository::class);
+        $this->app->bind(Contracts\Repositories\IndexRepository::class, Repositories\IndexRepository::class);
+    }
+
+    protected function registerCommands()
+    {
+        $this->commands([
+            \Rapide\LaravelApmEvents\Commands\CreateSchema::class,
+            \Rapide\LaravelApmEvents\Commands\ResetCommand::class
+        ]);
+    }
+
 
     /**
      * Get the services provided by the provider.
      *
      * @return array
      */
-    public function provides() {
-
-        return [];
-    }
-
-    private function handleConfigs() {
-
-        $configPath = __DIR__ . '/../config/evorg.php';
-
-        $this->publishes([$configPath => config_path('evorg.php')]);
-
-        $this->mergeConfigFrom($configPath, 'evorg');
-    }
-
-    private function register_commands(){
-        $this->app->singleton('command.buonzz.evorg.create_schema', function($app) {
-            return new \Buonzz\Evorg\Commands\CreateSchema();
-        });
-        $this->commands('command.buonzz.evorg.create_schema');
-
-       $this->app->singleton('command.buonzz.evorg.reset', function($app) {
-            return new \Buonzz\Evorg\Commands\ResetCommand();
-        });
-        $this->commands('command.buonzz.evorg.reset');
-
+    public function provides()
+    {
+        return [
+            Contracts\Repositories\EventRepository::class,
+            Contracts\Repositories\IndexRepository::class,
+            'apm-events',
+            'command.rapide.apm-events.create_schema',
+            'command.rapide.apm-events.reset'
+        ];
     }
 }

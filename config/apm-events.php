@@ -2,6 +2,7 @@
 
 return [
 
+
     /*
     |--------------------------------------------------------------------------
     | Application ID
@@ -11,7 +12,25 @@ return [
     | and should be unique per application. Since this will be a part of the ES
     | index name, make sure it is only alpha-numeric and doesnt contains whitespaces
     */
-	'app_id' => 'default',		
+    'app_id' => 'default',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Prefix
+    |--------------------------------------------------------------------------
+    |
+    | This will be the prefix of the index in elasticsearch
+    */
+    'prefix' => 'apm-events',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Version
+    |--------------------------------------------------------------------------
+    |
+    | If you want to version your schema layouts please give a version to the index
+    */
+    'version' => 1,
 
     /*
     |--------------------------------------------------------------------------
@@ -21,31 +40,31 @@ return [
     | A descriptive name for this application, this is something that is meant to
     | shown in dashboards and reports for example.
     */
-	'app_name' => 'Default Application',
+    'app_name' => 'Default Application',
 
     /*
     |--------------------------------------------------------------------------
     | Evorg Logging
     |--------------------------------------------------------------------------
     |
-    | When set to true, it writes all the ElasticSearch operations 
-    | to storage/logs/evorg.log 
+    | When set to true, it writes all the ElasticSearch operations
+    | to storage/logs/apm-events.log
     | can be useful in troubleshooting and monitoring purposes.
     */
-	'logging' => true,
+    'logging' => true,
 
     /*
     |--------------------------------------------------------------------------
     | Number of Shards
     |--------------------------------------------------------------------------
     |
-    |  An index can potentially store a large amount of data that can exceed the 
-    |  hardware limits of single server. You can split an enormously huge amount 
-    |  of data into shards so it can be split between multiple servers and then 
-    |  query it as if its just a single database. If you expect to have tons of 
-    |  data, adjust this to higher values. 
+    |  An index can potentially store a large amount of data that can exceed the
+    |  hardware limits of single server. You can split an enormously huge amount
+    |  of data into shards so it can be split between multiple servers and then
+    |  query it as if its just a single database. If you expect to have tons of
+    |  data, adjust this to higher values.
     */
-	'number_of_shards' => 2,
+    'number_of_shards' => 2,
 
     /*
     |--------------------------------------------------------------------------
@@ -58,7 +77,7 @@ return [
     | when you have a lots of read queries that needs to be distributed to multiple
     | servers.
     */
-	'number_of_replicas' => 1,
+    'number_of_replicas' => 1,
 
     /*
     |--------------------------------------------------------------------------
@@ -69,7 +88,7 @@ return [
     | You dont have to worry about which one is master/slave since it is automatically
     | being decided by the cluster itself.
     */
-	'hosts' => ['localhost'],
+    'hosts' => ['localhost'],
 
 
     /*
@@ -107,17 +126,18 @@ return [
     | The Event Schemas
     |--------------------------------------------------------------------------
     |
-    | Although you can virtually insert anything in the eventData parameter when 
+    | Although you can virtually insert anything in the eventData parameter when
     | inserting data. There are certain cases wherein you need to explicitly define
-	| the datatype of a certain field. Specially when you need to query it by its 
-	| exact value instead of doing a fuzzy searching.   
+	| the datatype of a certain field. Specially when you need to query it by its
+	| exact value instead of doing a fuzzy searching.
 	*/
 
-	'event_schemas' =>[
 
-		Buonzz\Evorg\Schemas\ClickSchema::class,
-        Buonzz\Evorg\Schemas\ImpressionSchema::class,
-        Buonzz\Evorg\Schemas\PageviewSchema::class,
+    'event_schemas' => [
+
+        Rapide\LaravelApmEvents\Schemas\ClickSchema::class,
+        Rapide\LaravelApmEvents\Schemas\ImpressionSchema::class,
+        Rapide\LaravelApmEvents\Schemas\PageviewSchema::class,
         // end of built-in schemas, add yours below
-	]
+    ]
 ];

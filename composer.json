@@ -1,21 +1,38 @@
 {
-    "name": "buonzz/evorg",
-    "description": "Scalable Events Database for Laravel and ElasticSearch",
-    "authors": [
-        {
-            "name": "Darwin Biler",
-            "email": "darwin@buonzz.com"
-        }
-    ],
-    "require": {
-        "php": ">=5.5.0",
-         "elasticsearch/elasticsearch": "2.*",
-        "jenssegers/agent": "^2.4"
+  "name": "rapideinternet/laravel-apm-events",
+  "description": "Events Database for Laravel and ElasticSearch",
+  "type": "library",
+  "authors": [
+    {
+      "name": "Darwin Biler",
+      "email": "darwin@buonzz.com"
     },
-    "autoload": {
-        "psr-4": {
-            "Buonzz\\Evorg\\": "src/"
-        }
-    },
-    "minimum-stability": "stable"
+    {
+      "name": "Peter Mein",
+      "email": "peter@rapide.software"
+    }
+  ],
+  "require": {
+    "php": ">=7.0",
+    "elasticsearch/elasticsearch": "^6.0",
+    "jenssegers/agent": "^2.6",
+    "myclabs/php-enum": "^1.6"
+  },
+  "autoload": {
+    "psr-4": {
+      "Rapide\\LaravelApmEvents\\": "src/"
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Rapide\\LaravelApmEvents\\ServiceProvider"
+      ],
+      "aliases": {
+        "ApmEvents": "Rapide\\LaravelApmEvents\\Facade"
+      }
+    }
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true
 }

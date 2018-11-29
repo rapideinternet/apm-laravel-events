@@ -1,15 +1,14 @@
 <?php
 
-namespace Buonzz\Evorg\Commands;
+namespace Rapide\LaravelApmEvents\Commands;
 
 use Illuminate\Console\Command;
-use Buonzz\Evorg\Indices\IndexNameBuilder;
-
-use Buonzz\Evorg\Jobs\CreateIndexSchema;
-use Buonzz\Evorg\Jobs\CreateIndexTemplate;
-
-use Buonzz\Evorg\ClientFactory;
-use Buonzz\Evorg\Indices\SchemaMappingDecorator;
+use Rapide\LaravelApmEvents\ClientFactory;
+use Rapide\LaravelApmEvents\Contracts\Decorators\SchemaMappingDecorator;
+use Rapide\LaravelApmEvents\Contracts\Repositories\IndexRepository;
+use Rapide\LaravelApmEvents\Jobs\CreateIndexSchema;
+use Rapide\LaravelApmEvents\Jobs\CreateIndexTemplate;
+use Rapide\LaravelApmEvents\Schemas\Schema;
 
 class CreateSchema extends Command
 {
@@ -18,7 +17,7 @@ class CreateSchema extends Command
      *
      * @var string
      */
-    protected $signature = 'evorg:create_schema';
+    protected $signature = 'apm-events:create_schema';
     /**
      * The console command description.
      *
@@ -26,60 +25,62 @@ class CreateSchema extends Command
      */
     protected $description = 'Create ElasticSearch Schema for the events';
     /**
+     * @var IndexRepository
+     */
+    protected $indexRepository;
+
+    /**
      * Create a new command instance.
      *
      * @return void
      */
 
-    private $idxbuilder;
-
-    public function __construct()
+    public function __construct(IndexRepository $indexRepository)
     {
         parent::__construct();
-        $this->idxbuilder = new IndexNameBuilder;
+
+        $this->indexRepository = $indexRepository;
     }
+
     /**
      * Execute the console command.
      *
      * @return mixed
      */
-    public function handle()
+    public function handle(ClientFactory $clientFactory, SchemaMappingDecorator $schemaMappingDecorator)
     {
-        $this->info('Creating the Schema for the evorg events');
-        $this->info('<comment>Connecting to ES Server:</comment> ' . config('evorg.hosts')[0]);
+        $this->info('Creating the Schema for the apm-events events');
+        $this->info('<comment>Connecting to ES Server:</comment> ' . config('apm-events.hosts')[0]);
 
-        foreach(config('evorg.event_schemas') as $schema_class)
-        {
-
+        foreach (config('apm-events.event_schemas') as $schema_class) {
+            /** @var Schema $cur_schema */
             $cur_schema = new $schema_class;
             $event_schema = $cur_schema->getEventName();
             $properties = $cur_schema->getMappings();
 
-            $indexname =  $this->idxbuilder->build($event_schema);
-            $decorator = new SchemaMappingDecorator($properties);
-            $properties = $decorator->decorate();
+            $indexName = $this->indexRepository->buildIndexName($event_schema);
+            $properties = $schemaMappingDecorator->decorate($properties);
 
-            $client = ClientFactory::getClient();
+            $client = $clientFactory->getClient();
 
             $mappings = array(
-            'index' =>  $indexname,
-            'body' => array(
-                'settings' => array(
-                    'number_of_shards' => config('evorg.number_of_shards'),
-                    'number_of_replicas' => config('evorg.number_of_replicas')
-                ),
-                'mappings' => [ $event_schema => [ 'properties' =>$properties] ]
+                'index' => $indexName,
+                'body' => array(
+                    'settings' => array(
+                        'number_of_shards' => config('apm-events.number_of_shards'),
+                        'number_of_replicas' => config('apm-events.number_of_replicas')
+                    ),
+                    'mappings' => [$event_schema => ['properties' => $properties]]
                 )
             );
 
 
-            if($client->indices()->exists(['index' => $indexname]))
-                $this->info( $indexname . ' already exists. no need to create');
-            else
-            {
-                $this->info('Building the schema: ' . $indexname);
-                dispatch( new CreateIndexSchema(['mappings' => $mappings]));
-                dispatch( new CreateIndexTemplate(['mappings' => $mappings]));
+            if ($client->indices()->exists(['index' => $indexName])) {
+                $this->info($indexName . ' already exists. no need to create');
+            } else {
+                $this->info('Building the schema: ' . $indexName);
+                dispatch(new CreateIndexSchema(['mappings' => $mappings]));
+                dispatch(new CreateIndexTemplate(['mappings' => $mappings]));
             }
         }
 

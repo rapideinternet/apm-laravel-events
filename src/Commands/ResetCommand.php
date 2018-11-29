@@ -1,11 +1,11 @@
 <?php
 
-namespace Buonzz\Evorg\Commands;
+namespace Rapide\LaravelApmEvents\Commands;
 
 use Illuminate\Console\Command;
-use Buonzz\Evorg\Indices\IndexNameBuilder;
-use Buonzz\Evorg\Jobs\CreateIndexSchema;
-use Buonzz\Evorg\ClientFactory;
+use Rapide\LaravelApmEvents\Indices\IndexNameBuilder;
+use Rapide\LaravelApmEvents\Jobs\CreateIndexSchema;
+use Rapide\LaravelApmEvents\ClientFactory;
 
 class ResetCommand extends Command
 {
@@ -14,7 +14,7 @@ class ResetCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'evorg:reset';
+    protected $signature = 'apm-events:reset';
     /**
      * The console command description.
      *
@@ -42,7 +42,7 @@ class ResetCommand extends Command
     public function handle()
     {
         $this->info('initiating..');
-        $this->info('<comment>Connecting to ES Server:</comment> ' . config('evorg.hosts')[0]);
+        $this->info('<comment>Connecting to ES Server:</comment> ' . config('apm-events.hosts')[0]);
 
 
         if($this->confirm('Are you sure you want to delete all documents, indices and templates of your application?'))
@@ -50,13 +50,13 @@ class ResetCommand extends Command
 
             $client = ClientFactory::getClient();
 
-            foreach(config('evorg.event_schemas') as $schema_class)
+            foreach(config('apm-events.event_schemas') as $schema_class)
             {
 
                 $cur_schema = new $schema_class;
                 $event_schema = $cur_schema->getEventName();
                 $properties = $cur_schema->getMappings();
-            
+
                 $indexname =  $this->idxbuilder->build($event_schema);
 
                 if($client->indices()->exists(['index' => $indexname]))
@@ -65,20 +65,20 @@ class ResetCommand extends Command
                         $params = ['index' => $indexname];
                         $response = $client->indices()->delete($params);
 
-                    }catch(\Exception $e){ 
+                    }catch(\Exception $e){
                         $this->error($e->getMessage());
-                    } 
-                    $this->info( $indexname . " deleted"); 
+                    }
+                    $this->info( $indexname . " deleted");
                 }
                 else
-                    $this->info( $indexname . " doesnt exists, skipping");                    
+                    $this->info( $indexname . " doesnt exists, skipping");
             }
             $this->info("Reset Success!");
 
-            $this->call('evorg:create_schema');
+            $this->call('apm-events:create_schema');
 
         }
         else
-            $this->info("Operation aborted");   
+            $this->info("Operation aborted");
     }
 }

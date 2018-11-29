@@ -1,19 +1,23 @@
 <?php
 
-namespace Buonzz\Evorg\Schemas;
+namespace Rapide\LaravelApmEvents\Schemas;
 
-use Buonzz\Evorg\Indices\SchemaMappingDecorator;
+class ImpressionSchema implements Schema
+{
 
-class ImpressionSchema implements SchemaInterface {
+    /**
+     * @return string
+     */
+    public function getEventName(): string
+    {
+        return 'impression';
+    }
 
-	public function getEventName(){
-		return 'impression';
-	}
-
-	public function getMappings(){
-
-		$mappings = ['element' => ["type" => "string", "index" => "not_analyzed"]];
-
-		return $mappings;
-	}
+    /**
+     * @return array
+     */
+    public function getMappings(): array
+    {
+        return ['element' => ["type" => "string", "index" => "not_analyzed"]];
+    }
 }

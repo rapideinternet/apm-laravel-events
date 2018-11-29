@@ -1,12 +1,12 @@
 <?php
-namespace Buonzz\Evorg\Jobs;
 
-use Illuminate\Bus\Queueable;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Contracts\Queue\ShouldQueue;
+namespace Rapide\LaravelApmEvents\Jobs;
 
 use GuzzleHttp\Client;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
 
 
 class ForceMergeSegments implements ShouldQueue
@@ -24,13 +24,11 @@ class ForceMergeSegments implements ShouldQueue
     {
         $index_name = $this->params['index_name'];
 
-        $client = new Client(['timeout'  => 2.0]);
+        $client = new Client(['timeout' => 2.0]);
 
-        $host = config('evorg.hosts')[0]; 
-        $uri = 'http://' $host . ':9200/' . $index_name . "/_forcemerge?max_num_segments=1"
-
+        $host = config('apm-events.hosts')[0];
+        $uri = 'http://' . $host . ':9200/' . $index_name . "/_forcemerge?max_num_segments=1";
 
         $r = $client->request('POST', $uri);
-
     }
 }
