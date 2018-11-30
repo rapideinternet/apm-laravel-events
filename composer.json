@@ -2,6 +2,7 @@
   "name": "rapideinternet/laravel-apm-events",
   "description": "Events Database for Laravel and ElasticSearch",
   "type": "library",
+  "license": "MIT",
   "authors": [
     {
       "name": "Peter Mein",
