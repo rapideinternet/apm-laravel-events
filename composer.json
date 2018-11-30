@@ -4,12 +4,14 @@
   "type": "library",
   "authors": [
     {
-      "name": "Darwin Biler",
-      "email": "darwin@buonzz.com"
+      "name": "Peter Mein",
+      "email": "peter@rapide.software",
+      "role": "Maintainer"
     },
     {
-      "name": "Peter Mein",
-      "email": "peter@rapide.software"
+      "name": "Darwin Biler",
+      "email": "darwin@buonzz.com",
+      "role": "Original developer"
     }
   ],
   "require": {
