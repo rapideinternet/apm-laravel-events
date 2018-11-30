@@ -2,7 +2,7 @@
 
 namespace Rapide\LaravelApmEvents\Contracts\Decorators;
 
-interface EventDecorator
+interface EventDecoratorContract
 {
     public function decorate($eventData);
 }

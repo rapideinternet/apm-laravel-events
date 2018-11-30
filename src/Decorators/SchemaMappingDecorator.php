@@ -1,7 +1,8 @@
 <?php namespace Rapide\LaravelApmEvents\Decorators;
 
+use Rapide\LaravelApmEvents\Contracts\Decorators\SchemaMappingDecoratorContract;
 
-class SchemaMappingDecorator implements \Rapide\LaravelApmEvents\Contracts\Decorators\SchemaMappingDecorator
+class SchemaMappingDecorator implements SchemaMappingDecoratorContract
 {
     public function decorate($mapping)
     {

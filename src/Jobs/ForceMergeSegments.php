@@ -2,11 +2,11 @@
 
 namespace Rapide\LaravelApmEvents\Jobs;
 
-use GuzzleHttp\Client;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Rapide\LaravelApmEvents\Contracts\Factories\ClientFactoryContract;
 
 
 class ForceMergeSegments implements ShouldQueue
@@ -20,15 +20,15 @@ class ForceMergeSegments implements ShouldQueue
         $this->params = $params;
     }
 
-    public function handle()
+    public function handle(ClientFactoryContract $clientFactory)
     {
-        $index_name = $this->params['index_name'];
+        $indexName = $this->params['index_name'];
 
-        $client = new Client(['timeout' => 2.0]);
+        $client = $clientFactory->getClient();
 
-        $host = config('apm-events.hosts')[0];
-        $uri = 'http://' . $host . ':9200/' . $index_name . "/_forcemerge?max_num_segments=1";
-
-        $r = $client->request('POST', $uri);
+        $client->indices()->forceMerge([
+            'index' => $indexName,
+            'max_num_segments' => 1
+        ]);
     }
 }

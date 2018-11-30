@@ -2,42 +2,30 @@
 
 namespace Rapide\LaravelApmEvents\Schemas;
 
-class ImpressionSchema extends BaseSchema
+class ImpressionSchema extends Schema
 {
 
-    /**
-     * @return string
-     */
-    public function getEventName(): string
-    {
-        return 'impression';
-    }
+    protected $eventName = 'impression';
 
-    /**
-     * @return array
-     */
-    public function getMappings(): array
-    {
-        return ['element' => ["type" => "string", "index" => "not_analyzed"]];
-    }
-
-    /**
-     * @return array
-     */
-    public function getSettings(): array
-    {
-        return [
-            'analysis' => [
-                'filter' => [
-
-                ],
-                'char_filter' => [
-
-                ],
-                'analyzer' => [
-
-                ]
+    protected $mapping = [
+        'element' =>
+            [
+                'type' => 'string',
+                'index' => 'not_analyzed'
             ]
-        ];
-    }
+    ];
+
+    protected $settings = [
+        'analysis' => [
+            'filter' => [
+
+            ],
+            'char_filter' => [
+
+            ],
+            'analyzer' => [
+
+            ]
+        ]
+    ];
 }

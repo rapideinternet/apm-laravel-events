@@ -2,12 +2,13 @@
 
 namespace Rapide\LaravelApmEvents\Jobs;
 
+use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Psr\Log\LoggerInterface;
-use Rapide\LaravelApmEvents\ClientFactory;
+use Rapide\LaravelApmEvents\Contracts\Factories\ClientFactoryContract;
 
 class CreateIndexSchema implements ShouldQueue
 {
@@ -20,14 +21,13 @@ class CreateIndexSchema implements ShouldQueue
         $this->params = $params;
     }
 
-    public function handle(ClientFactory $clientFactory, LoggerInterface $log)
+    public function handle(ClientFactoryContract $clientFactory, LoggerInterface $log)
     {
-        $params = $this->params['mappings'];
         $client = $clientFactory->getClient();
-        
+
         try {
-            $client->indices()->create($params);
-        } catch (\Exception $e) {
+            $client->indices()->create($this->params['mappings']);
+        } catch (Exception $e) {
             $log->error($e->getMessage());
         }
 

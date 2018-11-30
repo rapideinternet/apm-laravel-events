@@ -1,12 +1,18 @@
 <?php
 
-
 namespace Rapide\LaravelApmEvents\Repositories;
 
+use Rapide\LaravelApmEvents\Contracts\Repositories\IndexRepositoryContract;
 
-class IndexRepository implements \Rapide\LaravelApmEvents\Contracts\Repositories\IndexRepository
+class IndexRepository implements IndexRepositoryContract
 {
-    public function buildIndexName($eventName)
+    /**
+     * Build an elasticsearch index name based on an eventname
+     *
+     * @param $eventName
+     * @return string
+     */
+    public function buildIndexName($eventName): string
     {
         return sprintf('%s-%s-%s-v%d-%s',
             config('apm-events.prefix'),

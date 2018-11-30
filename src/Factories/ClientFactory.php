@@ -1,12 +1,14 @@
 <?php
 
-namespace Rapide\LaravelApmEvents;
+namespace Rapide\LaravelApmEvents\Factories;
 
+use Elasticsearch\Client;
 use Elasticsearch\ClientBuilder;
 use Illuminate\Log\Logger;
 use Psr\Log\LoggerInterface;
+use Rapide\LaravelApmEvents\Contracts\Factories\ClientFactoryContract;
 
-class ClientFactory
+class ClientFactory implements ClientFactoryContract
 {
 
     /**
@@ -30,9 +32,9 @@ class ClientFactory
     }
 
     /**
-     * @return \Elasticsearch\Client
+     * @return Client
      */
-    public function getClient()
+    public function getClient(): Client
     {
         $hosts = config('apm-events.hosts');
 

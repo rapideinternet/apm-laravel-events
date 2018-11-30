@@ -3,49 +3,61 @@
 
 use Illuminate\Support\Collection;
 use Jenssegers\Agent\Agent;
-use Rapide\LaravelApmEvents\Decorators\EventDecorator;
+use Rapide\LaravelApmEvents\Contracts\Decorators\EventDecoratorContract;
+use Rapide\LaravelApmEvents\Contracts\Factories\ClientFactoryContract;
+use Rapide\LaravelApmEvents\Contracts\Repositories\EventRepositoryContract;
+use Rapide\LaravelApmEvents\Contracts\Repositories\IndexRepositoryContract;
+use Rapide\LaravelApmEvents\Contracts\SchemaContract;
 use Rapide\LaravelApmEvents\Jobs\SaveEvent;
-use Rapide\LaravelApmEvents\Schemas\BaseSchema;
 
-
-class EventRepository implements \Rapide\LaravelApmEvents\Contracts\Repositories\EventRepository
+class EventRepository implements EventRepositoryContract
 {
     /**
      * @var Agent
      */
     protected $agent;
     /**
-     * @var IndexRepository
+     * @var IndexRepositoryContract
      */
     protected $indexRepository;
     /**
-     * @var EventDecorator
+     * @var EventDecoratorContract
      */
     protected $eventDecorator;
+    /**
+     * @var ClientFactoryContract
+     */
+    protected $clientFactory;
 
 
     /**
      * EventRepository constructor.
      * @param Agent $agent
-     * @param IndexRepository $indexRepository
+     * @param IndexRepositoryContract $indexRepository
+     * @param EventDecoratorContract $eventDecorator
+     * @param ClientFactoryContract $clientFactory
      */
-    public function __construct(Agent $agent, IndexRepository $indexRepository, EventDecorator $eventDecorator)
-    {
+    public function __construct(
+        Agent $agent,
+        IndexRepositoryContract $indexRepository,
+        EventDecoratorContract $eventDecorator,
+        ClientFactoryContract $clientFactory
+    ) {
 
         $this->agent = $agent;
         $this->indexRepository = $indexRepository;
         $this->eventDecorator = $eventDecorator;
+        $this->clientFactory = $clientFactory;
     }
 
     /**
-     * @param $eventName
-     * @param $eventData
+     * @param SchemaContract $schema
      */
-    public function create(BaseSchema $schema, $eventData)
+    public function create(SchemaContract $schema)
     {
         $indexName = $this->indexRepository->buildIndexName($schema->getEventName());
 
-        $eventData = $this->eventDecorator->decorate($eventData);
+        $eventData = $this->eventDecorator->decorate($schema->getParameters());
 
         $params = [
             'indexname' => $indexName,
@@ -60,7 +72,7 @@ class EventRepository implements \Rapide\LaravelApmEvents\Contracts\Repositories
 
     }
 
-    public function all(BaseSchema $schema)
+    public function all(SchemaContract $scheme)
     {
     }
 
@@ -74,13 +86,15 @@ class EventRepository implements \Rapide\LaravelApmEvents\Contracts\Repositories
 
     }
 
-    public function delete(BaseSchema $schema)
+    public function delete(SchemaContract $schema)
     {
         $params = [
             'index' => $this->indexRepository->build($schema->getEventName())
         ];
 
-        //0return $this->client->indices()->delete($params);
+        $client = $this->clientFactory->getClient();
+
+        return $client->indices()->delete($params);
     }
 
     /**

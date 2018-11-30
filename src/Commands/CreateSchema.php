@@ -3,13 +3,13 @@
 namespace Rapide\LaravelApmEvents\Commands;
 
 use Illuminate\Console\Command;
-use Rapide\LaravelApmEvents\ClientFactory;
-use Rapide\LaravelApmEvents\Contracts\Decorators\SchemaMappingDecorator;
-use Rapide\LaravelApmEvents\Contracts\Repositories\IndexRepository;
-use Rapide\LaravelApmEvents\Contracts\SchemaManager;
+use Rapide\LaravelApmEvents\Contracts\Decorators\SchemaMappingDecoratorContract;
+use Rapide\LaravelApmEvents\Contracts\Factories\ClientFactoryContract;
+use Rapide\LaravelApmEvents\Contracts\Repositories\IndexRepositoryContract;
+use Rapide\LaravelApmEvents\Contracts\SchemaContract;
+use Rapide\LaravelApmEvents\Contracts\SchemaManagerContract;
 use Rapide\LaravelApmEvents\Jobs\CreateIndexSchema;
 use Rapide\LaravelApmEvents\Jobs\CreateIndexTemplate;
-use Rapide\LaravelApmEvents\Schemas\BaseSchema;
 
 class CreateSchema extends Command
 {
@@ -26,17 +26,17 @@ class CreateSchema extends Command
      */
     protected $description = 'Create ElasticSearch Schema for the events';
     /**
-     * @var IndexRepository
+     * @var IndexRepositoryContract
      */
     protected $indexRepository;
 
     /**
      * Create a new command instance.
      *
-     * @return void
+     * @param IndexRepositoryContract $indexRepository
      */
 
-    public function __construct(IndexRepository $indexRepository)
+    public function __construct(IndexRepositoryContract $indexRepository)
     {
         parent::__construct();
 
@@ -46,23 +46,26 @@ class CreateSchema extends Command
     /**
      * Execute the console command.
      *
+     * @param ClientFactoryContract $clientFactory
+     * @param SchemaManagerContract $schemaManager
+     * @param SchemaMappingDecoratorContract $schemaMappingDecorator
      * @return mixed
      */
     public function handle(
-        ClientFactory $clientFactory,
-        SchemaManager $schemaManager,
-        SchemaMappingDecorator $schemaMappingDecorator
+        ClientFactoryContract $clientFactory,
+        SchemaManagerContract $schemaManager,
+        SchemaMappingDecoratorContract $schemaMappingDecorator
     ) {
         $this->info('Creating the Schema for the apm-events events');
         $this->info('<comment>Connecting to ES Server:</comment> ' . config('apm-events.hosts')[0]);
 
-        /** @var BaseSchema $schema */
+        /** @var SchemaContract $schema */
         foreach ($schemaManager->getSchemas() as $schema) {
 
-            $event_schema = $schema->getEventName();
+            $eventSchema = $schema->getEventName();
             $properties = $schema->getMappings();
 
-            $indexName = $this->indexRepository->buildIndexName($event_schema);
+            $indexName = $this->indexRepository->buildIndexName($eventSchema);
             $properties = $schemaMappingDecorator->decorate($properties);
 
             $client = $clientFactory->getClient();
@@ -74,10 +77,9 @@ class CreateSchema extends Command
                         'number_of_shards' => config('apm-events.number_of_shards'),
                         'number_of_replicas' => config('apm-events.number_of_replicas')
                     ),
-                    'mappings' => [$event_schema => ['properties' => $properties]]
+                    'mappings' => [$eventSchema => ['properties' => $properties]]
                 )
             );
-
 
             if ($client->indices()->exists(['index' => $indexName])) {
                 $this->info($indexName . ' already exists. no need to create');

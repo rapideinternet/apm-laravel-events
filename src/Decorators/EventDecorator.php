@@ -2,9 +2,9 @@
 
 use Illuminate\Http\Request;
 use Jenssegers\Agent\Agent;
-use Rapide\LaravelApmEvents\Enums\DeviceTypeEnum;
+use Rapide\LaravelApmEvents\Contracts\Decorators\EventDecoratorContract;
 
-class EventDecorator implements \Rapide\LaravelApmEvents\Contracts\Decorators\EventDecorator
+class EventDecorator implements EventDecoratorContract
 {
     /**
      * @var Agent
@@ -18,6 +18,7 @@ class EventDecorator implements \Rapide\LaravelApmEvents\Contracts\Decorators\Ev
     /**
      * EventDecorator constructor.
      * @param Agent $agent
+     * @param Request $request
      */
     public function __construct(Agent $agent, Request $request)
     {
@@ -49,15 +50,15 @@ class EventDecorator implements \Rapide\LaravelApmEvents\Contracts\Decorators\Ev
 
         if (!isset($eventData['device'])) {
             if ($this->agent->isDesktop()) {
-                $eventData['device'] = DeviceTypeEnum::DESKTOP;
+                $eventData['device'] = 'desktop';
             } elseif ($this->agent->isTablet()) {
-                $eventData['device'] = DeviceTypeEnum::TABLET;
+                $eventData['device'] = 'tablet';
             } elseif ($this->agent->isMobile()) {
-                $eventData['device'] = DeviceTypeEnum::MOBILE;
+                $eventData['device'] = 'mobile';
             } elseif ($this->agent->isRobot()) {
-                $eventData['device'] = DeviceTypeEnum::ROBOT;
+                $eventData['device'] = 'robot';
             } else {
-                $eventData['device'] = DeviceTypeEnum::OTHER;
+                $eventData['device'] = 'other';
             }
         }
 

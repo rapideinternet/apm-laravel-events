@@ -15,10 +15,12 @@
   "require": {
     "php": ">=7.0",
     "elasticsearch/elasticsearch": "^6.0",
-    "jenssegers/agent": "^2.6",
-    "myclabs/php-enum": "^1.6"
+    "jenssegers/agent": "^2.6"
   },
   "autoload": {
+    "files": [
+      "src/Helpers.php"
+    ],
     "psr-4": {
       "Rapide\\LaravelApmEvents\\": "src/"
     }

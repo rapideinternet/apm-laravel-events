@@ -8,7 +8,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Psr\Log\LoggerInterface;
-use Rapide\LaravelApmEvents\ClientFactory;
+use Rapide\LaravelApmEvents\Contracts\Factories\ClientFactoryContract;
 
 class SaveEvent implements ShouldQueue
 {
@@ -21,7 +21,7 @@ class SaveEvent implements ShouldQueue
         $this->params = $params;
     }
 
-    public function handle(ClientFactory $clientFactory, LoggerInterface $log)
+    public function handle(ClientFactoryContract $clientFactory, LoggerInterface $log)
     {
 
         $params = [

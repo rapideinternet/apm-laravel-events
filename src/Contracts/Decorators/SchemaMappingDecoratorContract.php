@@ -2,7 +2,7 @@
 
 namespace Rapide\LaravelApmEvents\Contracts\Decorators;
 
-interface SchemaMappingDecorator
+interface SchemaMappingDecoratorContract
 {
     public function decorate($mapping);
 }

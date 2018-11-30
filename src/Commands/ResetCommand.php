@@ -2,11 +2,13 @@
 
 namespace Rapide\LaravelApmEvents\Commands;
 
+use Exception;
 use Illuminate\Console\Command;
-use Rapide\LaravelApmEvents\ClientFactory;
-use Rapide\LaravelApmEvents\Indices\IndexNameBuilder;
-use Rapide\LaravelApmEvents\Repositories\IndexRepository;
-use Rapide\LaravelApmEvents\Schemas\BaseSchema;
+use Psr\Log\LoggerInterface;
+use Rapide\LaravelApmEvents\Contracts\Factories\ClientFactoryContract;
+use Rapide\LaravelApmEvents\Contracts\Repositories\IndexRepositoryContract;
+use Rapide\LaravelApmEvents\Contracts\SchemaContract;
+use Rapide\LaravelApmEvents\Contracts\SchemaManagerContract;
 
 class ResetCommand extends Command
 {
@@ -23,17 +25,17 @@ class ResetCommand extends Command
      */
     protected $description = 'delete all ElasticSearch documents, indices and templates.';
     /**
-     * @var IndexRepository
+     * @var IndexRepositoryContract
      */
     protected $indexRepository;
 
     /**
      * Create a new command instance.
      *
-     * @return void
+     * @param IndexRepositoryContract $indexRepository
      */
 
-    public function __construct(IndexRepository $indexRepository)
+    public function __construct(IndexRepositoryContract $indexRepository)
     {
         parent::__construct();
         $this->indexRepository = $indexRepository;
@@ -42,37 +44,40 @@ class ResetCommand extends Command
     /**
      * Execute the console command.
      *
+     * @param ClientFactoryContract $clientFactory
+     * @param SchemaManagerContract $schemaManager
+     * @param LoggerInterface $log
      * @return mixed
      */
-    public function handle()
-    {
+    public function handle(
+        ClientFactoryContract $clientFactory,
+        SchemaManagerContract $schemaManager
+    ) {
         $this->info('initiating..');
         $this->info('<comment>Connecting to ES Server:</comment> ' . config('apm-events.hosts')[0]);
 
 
         if ($this->confirm('Are you sure you want to delete all documents, indices and templates of your application?')) {
 
-            $client = ClientFactory::getClient();
+            $client = $clientFactory->getClient();
 
-            foreach (config('apm-events.event_schemas') as $schema_class) {
-                /** @var BaseSchema $cur_schema */
-                $cur_schema = new $schema_class;
-                $event_schema = $cur_schema->getEventName();
-                $properties = $cur_schema->getMappings();
+            foreach ($schemaManager->getSchemas() as $schema) {
+                /** @var SchemaContract $schema */
+                $eventName = $schema->getEventName();
 
-                $indexname = $this->indexRepository->buildIndexName($event_schema);
+                $indexName = $this->indexRepository->buildIndexName($eventName);
 
-                if ($client->indices()->exists(['index' => $indexname])) {
+                if ($client->indices()->exists(['index' => $indexName])) {
                     try {
-                        $params = ['index' => $indexname];
-                        $response = $client->indices()->delete($params);
+                        $params = ['index' => $indexName];
 
-                    } catch (\Exception $e) {
+                        $client->indices()->delete($params);
+                    } catch (Exception $e) {
                         $this->error($e->getMessage());
                     }
-                    $this->info($indexname . " deleted");
+                    $this->info($indexName . " deleted");
                 } else {
-                    $this->info($indexname . " doesnt exists, skipping");
+                    $this->info($indexName . " doesnt exists, skipping");
                 }
             }
             $this->info("Reset Success!");

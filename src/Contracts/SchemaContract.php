@@ -2,7 +2,7 @@
 
 namespace Rapide\LaravelApmEvents\Contracts;
 
-interface Schema
+interface SchemaContract extends \ArrayAccess
 {
     /**
      * @return string
@@ -20,8 +20,20 @@ interface Schema
     public function getSettings(): array;
 
     /**
-     * @param $params
      * @return bool
      */
-    public function validate($params): bool;
+    public function validate(): bool;
+
+    /**
+     * @param array $array
+     * @return $this
+     */
+    public function setParameters(array $array);
+
+    /**
+     * @return array
+     */
+    public function getParameters(): array;
+
+    public function setParameter($key, $value);
 }

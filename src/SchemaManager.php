@@ -4,9 +4,10 @@ namespace Rapide\LaravelApmEvents;
 
 
 use Illuminate\Contracts\Container\Container;
-use Rapide\LaravelApmEvents\Schemas\BaseSchema;
+use Rapide\LaravelApmEvents\Contracts\SchemaManagerContract;
+use Rapide\LaravelApmEvents\Schemas\Schema;
 
-class SchemaManager implements \Rapide\LaravelApmEvents\Contracts\SchemaManager
+class SchemaManager implements SchemaManagerContract
 {
     protected $schemas = [];
     /**
@@ -25,7 +26,7 @@ class SchemaManager implements \Rapide\LaravelApmEvents\Contracts\SchemaManager
         $this->schemas[$callable->getEventName()] = $callable;
     }
 
-    public function createSchema(string $schema): BaseSchema
+    public function createSchema(string $schema): Schema
     {
         return $this->container->make($schema);
     }
@@ -35,7 +36,7 @@ class SchemaManager implements \Rapide\LaravelApmEvents\Contracts\SchemaManager
         return isset($this->schemas[$eventName]);
     }
 
-    public function getSchema($eventName): BaseSchema
+    public function getSchema($eventName): Schema
     {
         return $this->schemas[$eventName];
     }

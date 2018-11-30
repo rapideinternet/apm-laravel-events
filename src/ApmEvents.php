@@ -1,14 +1,15 @@
 <?php namespace Rapide\LaravelApmEvents;
 
-use Rapide\LaravelApmEvents\Contracts\Repositories\EventRepository;
-use Rapide\LaravelApmEvents\Contracts\SchemaManager;
+use Rapide\LaravelApmEvents\Contracts\ApmEventsContract;
+use Rapide\LaravelApmEvents\Contracts\Repositories\EventRepositoryContract;
+use Rapide\LaravelApmEvents\Contracts\SchemaContract;
+use Rapide\LaravelApmEvents\Contracts\SchemaManagerContract;
 use Rapide\LaravelApmEvents\Exceptions\InvalidSchemaException;
-use Rapide\LaravelApmEvents\Schemas\BaseSchema;
 
-class ApmEvents
+class ApmEvents implements ApmEventsContract
 {
     /**
-     * @var EventRepository
+     * @var EventRepositoryContract
      */
     protected $eventRepository;
     /**
@@ -16,32 +17,40 @@ class ApmEvents
      */
     protected $schemaManager;
     /**
-     * @var BaseSchema
+     * @var SchemaContract
      */
     protected $schema;
 
-    public function __construct(EventRepository $eventRepository, SchemaManager $schemaManager)
+    public function __construct(EventRepositoryContract $eventRepository, SchemaManagerContract $schemaManager)
     {
         $this->eventRepository = $eventRepository;
         $this->schemaManager = $schemaManager;
     }
 
-    public function event($eventName)
+    public function event($event)
     {
-        if (!$this->schemaManager->schemaExists($eventName)) {
-            throw new InvalidSchemaException('No schema exists for event [' . $eventName . ']');
-        }
+        if ($event instanceof SchemaContract) {
+            $this->schema = $event;
+        } else {
+            if (!$this->schemaManager->schemaExists($event)) {
+                throw new InvalidSchemaException('No schema exists for event [' . $event . ']');
+            }
 
-        $this->schema = $this->schemaManager->getSchema($eventName);
+            $this->schema = $this->schemaManager->getSchema($event);
+        }
 
         return $this;
     }
 
-    public function insert($params)
+    public function insert($params = null)
     {
-        $this->validateSchema($params);
+        if ($params !== null) {
+            $this->schema->setParameters($params);
+        }
 
-        return $this->eventRepository->create($this->schema, $params);
+        $this->validateSchema();
+
+        return $this->eventRepository->create($this->schema);
     }
 
     public function get()
@@ -149,9 +158,9 @@ class ApmEvents
         $this->eventRepository->delete($this->schema);
     }
 
-    public function validateSchema($params)
+    public function validateSchema()
     {
-        if (!$this->schema->validate($params)) {
+        if (!$this->schema->validate()) {
             throw new InvalidSchemaException('Missing schema parameters');
         }
 

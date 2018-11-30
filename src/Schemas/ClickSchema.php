@@ -2,46 +2,28 @@
 
 namespace Rapide\LaravelApmEvents\Schemas;
 
-class ClickSchema extends BaseSchema
+class ClickSchema extends Schema
 {
-    /**
-     * @return string
-     */
-    public function getEventName(): string
-    {
-        return 'click';
-    }
+    protected $eventName = 'click';
 
-    /**
-     * @return array
-     */
-    public function getMappings(): array
-    {
-        return [
-            'element' => [
-                "type" => "string",
-                "index" => "not_analyzed"
+    protected $mapping = [
+        'element' => [
+            "type" => "string",
+            "index" => "not_analyzed"
+        ]
+    ];
+
+    protected $settings = [
+        'analysis' => [
+            'filter' => [
+
+            ],
+            'char_filter' => [
+
+            ],
+            'analyzer' => [
+
             ]
-        ];
-    }
-
-    /**
-     * @return array
-     */
-    public function getSettings(): array
-    {
-        return [
-            'analysis' => [
-                'filter' => [
-
-                ],
-                'char_filter' => [
-
-                ],
-                'analyzer' => [
-
-                ]
-            ]
-        ];
-    }
+        ]
+    ];
 }
