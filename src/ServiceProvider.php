@@ -1,6 +1,8 @@
 <?php namespace Rapide\LaravelApmEvents;
 
+use Illuminate\Events\Dispatcher;
 use Illuminate\Support\ServiceProvider as LaravelServiceProvider;
+use Rapide\LaravelApmEvents\Subscribers\EventSubscriber;
 
 class ServiceProvider extends LaravelServiceProvider
 {
@@ -45,6 +47,22 @@ class ServiceProvider extends LaravelServiceProvider
         $this->registerRepositories();
         $this->registerSchemas();
         $this->registerCommands();
+        $this->registerEventSubscriber();
+
+    }
+
+    protected function registerEventSubscriber()
+    {
+        if (config('apm-events.event_subscriber') === true) {
+            $this->app->singleton(Subscribers\EventSubscriber::class, function () {
+                $apm = app(ApmEvents::class);
+
+                return new EventSubscriber($apm);
+            });
+
+            app(Dispatcher::class)->subscribe(EventSubscriber::class);
+        }
+
     }
 
     protected function registerDecorators()

@@ -137,5 +137,7 @@ return [
         Rapide\LaravelApmEvents\Schemas\ImpressionSchema::class,
         Rapide\LaravelApmEvents\Schemas\PageviewSchema::class,
         // end of built-in schemas, add yours below
-    ]
+    ],
+
+    'event_subscriber' => true
 ];
